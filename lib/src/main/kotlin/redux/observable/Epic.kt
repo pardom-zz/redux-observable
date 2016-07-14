@@ -19,15 +19,15 @@ import rx.Observable
  * limitations under the License.
  */
 
-interface Epic<S : Any, A : Any> {
+interface Epic<S : Any> {
 
-	fun map(actions: Observable<A>, store: Store<S, A>): Observable<A>
+	fun map(actions: Observable<out Any>, store: Store<S>): Observable<out Any>
 
 	companion object {
 
-		fun <S : Any, A : Any> combine(vararg epics: Epic<S, A>): Epic<S, A> {
-			return object : Epic<S, A> {
-				override fun map(actions: Observable<A>, store: Store<S, A>): Observable<A> {
+		fun <S : Any> combine(vararg epics: Epic<S>): Epic<S> {
+			return object : Epic<S> {
+				override fun map(actions: Observable<out Any>, store: Store<S>): Observable<out Any> {
 					return Observable.merge(epics.map { it.map(actions, store) })
 				}
 			}

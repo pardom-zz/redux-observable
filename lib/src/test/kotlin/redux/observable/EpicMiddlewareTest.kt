@@ -4,7 +4,6 @@ import org.jetbrains.spek.api.Spek
 import redux.Middleware
 import redux.Reducer
 import redux.Store
-import redux.observable.helpers.ActionCreators.Action
 import redux.observable.helpers.ActionCreators.Action.Fire1
 import redux.observable.helpers.ActionCreators.Action.Fire2
 import redux.observable.helpers.ActionCreators.action1
@@ -37,16 +36,16 @@ class EpicMiddlewareTest : Spek({
 		describe("create") {
 
 			it("should accept a epic argument that wires up a stream of actions to a stream of actions") {
-				val reducer = object : Reducer<List<Action>, Action> {
-					override fun reduce(state: List<Action>, action: Action): List<Action> {
+				val reducer = object : Reducer<List<Any>> {
+					override fun reduce(state: List<Any>, action: Any): List<Any> {
 						return state + action
 					}
 				}
 
-				val epic = object : Epic<List<Action>, Action> {
+				val epic = object : Epic<List<Any>> {
 					override fun map(
-							actions: Observable<Action>,
-							store: Store<List<Action>, Action>): Observable<Action> {
+							actions: Observable<out Any>,
+							store: Store<List<Any>>): Observable<out Any> {
 
 						return Observable.merge(
 								actions.ofType(Fire1::class.java).map { action1() },
@@ -64,6 +63,7 @@ class EpicMiddlewareTest : Spek({
 
 				expect(store.getState()) {
 					listOf(
+							Store.INIT,
 							fire1(),
 							action1(),
 							fire2(),

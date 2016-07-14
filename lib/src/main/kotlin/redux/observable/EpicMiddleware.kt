@@ -21,19 +21,19 @@ import rx.subjects.PublishSubject
  * limitations under the License.
  */
 
-class EpicMiddleware<S : Any, A : Any> : Middleware<S, A> {
-	val actions = PublishSubject.create<A>() // TODO: Use RelaySubject to ignore termination events
-	val epic: Epic<S, A>
+class EpicMiddleware<S : Any> : Middleware<S> {
+	val actions = PublishSubject.create<Any>() // TODO: Use RelaySubject to ignore termination events
+	val epic: Epic<S>
 
 	var subscribed = false
 
-	private constructor(epic: Epic<S, A>) {
+	private constructor(epic: Epic<S>) {
 		this.epic = epic
 	}
 
-	override fun dispatch(store: Store<S, A>, action: A, next: Dispatcher<A>): A {
+	override fun dispatch(store: Store<S>, action: Any, next: Dispatcher): Any {
 		if (!subscribed) {
-			epic.map(actions.asObservable(), store).subscribe { store.dispatch(it) }
+			epic.map(actions.asObservable(), store).subscribe { store.dispatch(it!!) }
 			subscribed = true
 		}
 
@@ -44,7 +44,7 @@ class EpicMiddleware<S : Any, A : Any> : Middleware<S, A> {
 
 	companion object {
 
-		fun <S : Any, A : Any> create(epic: Epic<S, A>): EpicMiddleware<S, A> {
+		fun <S : Any> create(epic: Epic<S>): EpicMiddleware<S> {
 			return EpicMiddleware(epic)
 		}
 
