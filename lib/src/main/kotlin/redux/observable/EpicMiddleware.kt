@@ -3,7 +3,9 @@ package redux.observable
 import redux.Dispatcher
 import redux.Middleware
 import redux.Store
+import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
+import java.util.concurrent.atomic.AtomicBoolean
 
 /*
  * Copyright (C) 2016 Michael Pardo
@@ -22,24 +24,26 @@ import rx.subjects.PublishSubject
  */
 
 class EpicMiddleware<S : Any> : Middleware<S> {
-	val actions = PublishSubject.create<Any>() // TODO: Use RelaySubject to ignore termination events
-	val epic: Epic<S>
-
-	var subscribed = false
+	private val actions = PublishSubject.create<Any>() // TODO: Use RelaySubject to ignore termination events
+	private val epics: BehaviorSubject<Epic<S>>
+	private val subscribed = AtomicBoolean(false)
 
 	private constructor(epic: Epic<S>) {
-		this.epic = epic
+		epics = BehaviorSubject.create(epic)
 	}
 
 	override fun dispatch(store: Store<S>, action: Any, next: Dispatcher): Any {
-		if (!subscribed) {
-			epic.map(actions.asObservable(), store).subscribe { store.dispatch(it!!) }
-			subscribed = true
+		if (subscribed.compareAndSet(false, true)) {
+			epics.switchMap { it.map(actions, store) }.subscribe { store.dispatch(it) }
 		}
 
 		val result = next.dispatch(action)
 		actions.onNext(action)
 		return result
+	}
+
+	fun replaceEpic(epic: Epic<S>) {
+		epics.onNext(epic)
 	}
 
 	companion object {

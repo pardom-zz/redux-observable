@@ -1,12 +1,5 @@
 package redux.observable.helpers
 
-import redux.observable.helpers.ActionCreators.Action.Action1
-import redux.observable.helpers.ActionCreators.Action.Action2
-import redux.observable.helpers.ActionCreators.Action.AsyncAction1
-import redux.observable.helpers.ActionCreators.Action.AsyncAction2
-import redux.observable.helpers.ActionCreators.Action.Fire1
-import redux.observable.helpers.ActionCreators.Action.Fire2
-
 /*
  * Copyright (C) 2016 Michael Pardo
  *
@@ -26,24 +19,19 @@ import redux.observable.helpers.ActionCreators.Action.Fire2
 object ActionCreators {
 
 	sealed class Action {
+		object FireGeneric : Action()
+		object Epic1Generic : Action()
+		object Epic2Generic : Action()
 		object Fire1 : Action()
 		object Fire2 : Action()
+		object Fire3 : Action()
+		object Fire4 : Action()
 		object Action1 : Action()
 		object Action2 : Action()
+		object Action3 : Action()
+		object Action4 : Action()
 		object AsyncAction1 : Action()
 		object AsyncAction2 : Action()
 	}
-
-	fun fire1() = Fire1
-
-	fun fire2() = Fire2
-
-	fun action1() = Action1
-
-	fun action2() = Action2
-
-	fun asyncAction1() = AsyncAction1
-
-	fun asyncAction2() = AsyncAction2
 
 }
