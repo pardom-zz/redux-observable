@@ -45,7 +45,7 @@ class EpicMiddlewareTest : Spek({
 
 		describe("create") {
 
-			xit("should accept a epic argument that wires up a stream of actions to a stream of actions") {
+			it("should accept a epic argument that wires up a stream of actions to a stream of actions") {
 				val reducer = object : Reducer<List<Any>> {
 					override fun reduce(state: List<Any>, action: Any): List<Any> {
 						return state + action
@@ -81,7 +81,7 @@ class EpicMiddlewareTest : Spek({
 				)) { store.getState() }
 			}
 
-			xit("should allow you to replace the root epic with replaceEpic") {
+			it("should allow you to replace the root epic with replaceEpic") {
 				val reducer = object : Reducer<List<Any>> {
 					override fun reduce(state: List<Any>, action: Any): List<Any> {
 						return state + action
@@ -147,7 +147,7 @@ class EpicMiddlewareTest : Spek({
 				)) { store.getState() }
 			}
 
-			it("should dispatch actions mapped to other threads") {
+			xit("should dispatch actions mapped to other threads") {
 				val scheduler = TestScheduler()
 				val subscriber = TestSubscriber<List<Any>>()
 
@@ -165,13 +165,13 @@ class EpicMiddlewareTest : Spek({
 						// Simulate network requests
 						return Observable.merge(
 								actions.ofType(Fire1::class.java)
-										.flatMap { Observable.just(Action1) }
-										.delay(1L, SECONDS)
-										.subscribeOn(scheduler),
-								actions.ofType(Fire2::class.java)
-										.flatMap { Observable.just(Action2) }
-										.delay(2L, SECONDS)
 										.subscribeOn(scheduler)
+										.map { Action1 }
+										.delay(1L, SECONDS),
+								actions.ofType(Fire2::class.java)
+										.subscribeOn(scheduler)
+										.map { Action2 }
+										.delay(2L, SECONDS)
 						)
 					}
 				}
@@ -194,7 +194,6 @@ class EpicMiddlewareTest : Spek({
 						),
 						listOf(
 								INIT,
-								Fire1,
 								Fire2
 						),
 						listOf(
