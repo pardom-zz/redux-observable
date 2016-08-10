@@ -3,6 +3,7 @@ package redux.observable
 import redux.Dispatcher
 import redux.Middleware
 import redux.Store
+import rx.schedulers.Schedulers
 import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
 import java.util.concurrent.atomic.AtomicBoolean
@@ -34,7 +35,8 @@ class EpicMiddleware<S : Any> : Middleware<S> {
 
 	override fun dispatch(store: Store<S>, action: Any, next: Dispatcher): Any {
 		if (subscribed.compareAndSet(false, true)) {
-			epics.switchMap { it.map(actions, store) }.subscribe { store.dispatch(it) }
+			epics.switchMap { it.map(actions.subscribeOn(Schedulers.immediate()), store) }
+					.subscribe { store.dispatch(it) }
 		}
 
 		val result = next.dispatch(action)

@@ -155,20 +155,17 @@ class EpicMiddlewareTest : Spek({
 				val epic = object : Epic<List<Any>> {
 					override fun map(actions: Observable<out Any>, store: Store<List<Any>>): Observable<out Any> {
 						// Simulate network requests
-						return actions
-								.flatMap { action ->
-									when (action) {
-										is Fire1 -> Observable.just(action)
-												.subscribeOn(scheduler)
-												.delay(100L, MILLISECONDS, scheduler)
-												.map { Action1 }
-										is Fire2 -> Observable.just(action)
-												.subscribeOn(scheduler)
-												.delay(200L, MILLISECONDS, scheduler)
-												.map { Action2 }
-										else -> Observable.empty()
-									}
-								}
+						val networkRequest1 = Observable.just(Action1)
+								.subscribeOn(scheduler)
+								.delay(100L, MILLISECONDS, scheduler)
+						val networkRequest2 = Observable.just(Action2)
+								.subscribeOn(scheduler)
+								.delay(200L, MILLISECONDS, scheduler)
+
+						return Observable.merge(
+								actions.ofType(Fire1::class.java).flatMap { networkRequest1 },
+								actions.ofType(Fire2::class.java).flatMap { networkRequest2 }
+						)
 					}
 				}
 
