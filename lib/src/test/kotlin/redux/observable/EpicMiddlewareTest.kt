@@ -19,8 +19,9 @@ import redux.observable.helpers.ActionCreators.Action.Fire4
 import redux.observable.helpers.ActionCreators.Action.FireGeneric
 import rx.Observable
 import rx.observers.TestSubscriber
+import rx.plugins.RxPluginsPackage
 import rx.schedulers.TestScheduler
-import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import kotlin.test.expect
 
 /*
@@ -41,7 +42,9 @@ import kotlin.test.expect
 
 class EpicMiddlewareTest : Spek({
 
-	describe("EpicMiddlware") {
+	beforeEach { RxPluginsPackage.setUp() }
+
+	describe("EpicMiddleware") {
 
 		describe("create") {
 
@@ -53,10 +56,7 @@ class EpicMiddlewareTest : Spek({
 				}
 
 				val epic = object : Epic<List<Any>> {
-					override fun map(
-							actions: Observable<out Any>,
-							store: Store<List<Any>>): Observable<out Any> {
-
+					override fun map(actions: Observable<out Any>, store: Store<List<Any>>): Observable<out Any> {
 						return Observable.merge(
 								actions.ofType(Fire1::class.java).map { Action1 },
 								actions.ofType(Fire2::class.java).map { Action2 }
@@ -64,9 +64,7 @@ class EpicMiddlewareTest : Spek({
 					}
 				}
 
-				val middleware = EpicMiddleware.create(epic)
-
-				val store = Store.create(reducer, emptyList(), Middleware.apply(middleware))
+				val store = Store.create(reducer, emptyList(), Middleware.apply(EpicMiddleware.create(epic)))
 
 				store.dispatch(Fire1)
 				store.dispatch(Fire2)
@@ -89,10 +87,7 @@ class EpicMiddlewareTest : Spek({
 				}
 
 				val epic1 = object : Epic<List<Any>> {
-					override fun map(
-							actions: Observable<out Any>,
-							store: Store<List<Any>>): Observable<out Any> {
-
+					override fun map(actions: Observable<out Any>, store: Store<List<Any>>): Observable<out Any> {
 						return Observable.merge(
 								actions.ofType(Fire1::class.java).map { Action1 },
 								actions.ofType(Fire2::class.java).map { Action2 },
@@ -147,7 +142,7 @@ class EpicMiddlewareTest : Spek({
 				)) { store.getState() }
 			}
 
-			xit("should dispatch actions mapped to other threads") {
+			it("should dispatch actions mapped to other threads") {
 				val scheduler = TestScheduler()
 				val subscriber = TestSubscriber<List<Any>>()
 
@@ -158,35 +153,33 @@ class EpicMiddlewareTest : Spek({
 				}
 
 				val epic = object : Epic<List<Any>> {
-					override fun map(
-							actions: Observable<out Any>,
-							store: Store<List<Any>>): Observable<out Any> {
-
+					override fun map(actions: Observable<out Any>, store: Store<List<Any>>): Observable<out Any> {
 						// Simulate network requests
-						return Observable.merge(
-								actions.ofType(Fire1::class.java)
-										.subscribeOn(scheduler)
-										.map { Action1 }
-										.delay(1L, SECONDS),
-								actions.ofType(Fire2::class.java)
-										.subscribeOn(scheduler)
-										.map { Action2 }
-										.delay(2L, SECONDS)
-						)
+						return actions
+								.flatMap { action ->
+									when (action) {
+										is Fire1 -> Observable.just(action)
+												.subscribeOn(scheduler)
+												.delay(100L, MILLISECONDS, scheduler)
+												.map { Action1 }
+										is Fire2 -> Observable.just(action)
+												.subscribeOn(scheduler)
+												.delay(200L, MILLISECONDS, scheduler)
+												.map { Action2 }
+										else -> Observable.empty()
+									}
+								}
 					}
 				}
 
-				val middleware = EpicMiddleware.create(epic)
-
-				val store = Store.create(reducer, emptyList(), Middleware.apply(middleware))
+				val store = Store.create(reducer, emptyList(), Middleware.apply(EpicMiddleware.create(epic)))
 				store.asObservable().subscribe(subscriber)
 
 				store.dispatch(Fire1)
 				store.dispatch(Fire2)
 
-				scheduler.advanceTimeBy(5L, SECONDS)
+				scheduler.advanceTimeBy(500L, MILLISECONDS)
 
-				subscriber.assertValueCount(4)
 				subscriber.assertValues(
 						listOf(
 								INIT,
@@ -194,6 +187,7 @@ class EpicMiddlewareTest : Spek({
 						),
 						listOf(
 								INIT,
+								Fire1,
 								Fire2
 						),
 						listOf(
@@ -215,5 +209,7 @@ class EpicMiddlewareTest : Spek({
 		}
 
 	}
+
+	afterEach { RxPluginsPackage.reset() }
 
 })
