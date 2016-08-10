@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 
 class EpicMiddleware<S : Any> : Middleware<S> {
-	private val actions = PublishSubject.create<Any>() // TODO: Use RelaySubject to ignore termination events
+	private val actions = PublishSubject.create<Any>()
 	private val epics: BehaviorSubject<Epic<S>>
 	private val subscribed = AtomicBoolean(false)
 
