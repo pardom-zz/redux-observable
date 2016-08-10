@@ -14,7 +14,6 @@ sourceSets {
 }
 
 dependencies {
-	compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 	compile 'com.github.pardom:redux-kotlin:-SNAPSHOT'
 	compile 'io.reactivex:rxjava:1.1.7'
 
