@@ -1,10 +1,8 @@
 [![](https://jitpack.io/v/pardom/redux-observable-kotlin.svg)](https://jitpack.io/#pardom/redux-observable-kotlin)
 
-
-# Redux Observable Kotlin
+# redux-observable-kotlin
 
 Redux RxJava Observable middleware for Kotlin
-
 
 Download
 --------
