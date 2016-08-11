@@ -15,11 +15,11 @@ sourceSets {
 
 dependencies {
 	compile 'com.github.pardom:redux-kotlin:-SNAPSHOT'
-	compile 'io.reactivex:rxjava:1.1.7'
+	compile 'io.reactivex:rxjava:1.1.8'
 
-	testCompile 'junit:junit:4.11'
+	testCompile 'junit:junit:4.12'
 	testCompile 'com.nhaarman:mockito-kotlin:0.3.1'
-	testCompile 'org.jetbrains.spek:spek:1.0.+'
+	testCompile 'org.jetbrains.spek:spek:1.0.9'
 	testCompile 'org.mockito:mockito-core:2.0.86-beta'
 	testCompile 'com.github.pardom:redux-rxjava-kotlin:-SNAPSHOT'
 }
