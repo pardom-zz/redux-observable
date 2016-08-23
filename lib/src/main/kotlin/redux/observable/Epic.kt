@@ -21,18 +21,22 @@ import rx.Observable
 
 interface Epic<S : Any> {
 
-	fun map(actions: Observable<out Any>, store: Store<S>): Observable<out Any>
+    fun map(actions: Observable<out Any>, store: Store<S>): Observable<out Any>
 
-	companion object {
+    companion object {
 
-		fun <S : Any> combine(vararg epics: Epic<S>): Epic<S> {
-			return object : Epic<S> {
-				override fun map(actions: Observable<out Any>, store: Store<S>): Observable<out Any> {
-					return Observable.merge(epics.map { it.map(actions, store) })
-				}
-			}
-		}
+        fun <S : Any> combine(vararg epics: Epic<S>): Epic<S> {
+            return object : Epic<S> {
+                override fun map(actions: Observable<out Any>, store: Store<S>): Observable<out Any> {
+                    return Observable.merge(epics.map { it.map(actions, store) })
+                }
+            }
+        }
 
-	}
+        operator fun <S : Any> invoke(f: (Observable<out Any>, Store<S>) -> Observable<out Any>) = object : Epic<S> {
+            override fun map(actions: Observable<out Any>, store: Store<S>) = f(actions, store)
+        }
+
+    }
 
 }
