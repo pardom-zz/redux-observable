@@ -3,6 +3,7 @@ package redux.observable
 import redux.Dispatcher
 import redux.Middleware
 import redux.Store
+import rx.Observable
 import rx.schedulers.Schedulers
 import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
@@ -26,16 +27,16 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class EpicMiddleware<S : Any> : Middleware<S> {
 	private val actions = PublishSubject.create<Any>()
-	private val epics: BehaviorSubject<Epic<S>>
+	private val epics: BehaviorSubject<(Observable<out Any>, Store<S>) -> Observable<out Any>>
 	private val subscribed = AtomicBoolean(false)
 
-	private constructor(epic: Epic<S>) {
+	private constructor(epic: (Observable<out Any>, Store<S>) -> Observable<out Any>) {
 		epics = BehaviorSubject.create(epic)
 	}
 
 	override fun dispatch(store: Store<S>, action: Any, next: Dispatcher): Any {
 		if (subscribed.compareAndSet(false, true)) {
-			epics.switchMap { it.map(actions.subscribeOn(Schedulers.immediate()), store) }
+			epics.switchMap { it(actions.subscribeOn(Schedulers.immediate()), store) }
 					.subscribe { store.dispatch(it) }
 		}
 
@@ -44,13 +45,13 @@ class EpicMiddleware<S : Any> : Middleware<S> {
 		return result
 	}
 
-	fun replaceEpic(epic: Epic<S>) {
+	fun replaceEpic(epic: (Observable<out Any>, Store<S>) -> Observable<out Any>) {
 		epics.onNext(epic)
 	}
 
 	companion object {
 
-		fun <S : Any> create(epic: Epic<S>): EpicMiddleware<S> {
+		fun <S : Any> create(epic: (Observable<out Any>, Store<S>) -> Observable<out Any>): EpicMiddleware<S> {
 			return EpicMiddleware(epic)
 		}
 
