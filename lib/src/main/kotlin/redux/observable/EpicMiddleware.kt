@@ -25,34 +25,34 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 
 class EpicMiddleware<S : Any> : Middleware<S> {
-	private val actions = PublishSubject.create<Any>()
-	private val epics: BehaviorSubject<Epic<S>>
-	private val subscribed = AtomicBoolean(false)
+    private val actions = PublishSubject.create<Any>()
+    private val epics: BehaviorSubject<Epic<S>>
+    private val subscribed = AtomicBoolean(false)
 
-	private constructor(epic: Epic<S>) {
-		epics = BehaviorSubject.create(epic)
-	}
+    private constructor(epic: Epic<S>) {
+        epics = BehaviorSubject.create(epic)
+    }
 
-	override fun dispatch(store: Store<S>, action: Any, next: Dispatcher): Any {
-		if (subscribed.compareAndSet(false, true)) {
-			epics.switchMap { it.map(actions.subscribeOn(Schedulers.immediate()), store) }
-					.subscribe { store.dispatch(it) }
-		}
+    override fun dispatch(store: Store<S>, action: Any, next: Dispatcher): Any {
+        if (subscribed.compareAndSet(false, true)) {
+            epics.switchMap { it.map(actions.subscribeOn(Schedulers.immediate()), store) }
+                    .subscribe { store.dispatch(it) }
+        }
 
-		val result = next.dispatch(action)
-		actions.onNext(action)
-		return result
-	}
+        val result = next.dispatch(action)
+        actions.onNext(action)
+        return result
+    }
 
-	fun replaceEpic(epic: Epic<S>) {
-		epics.onNext(epic)
-	}
+    fun replaceEpic(epic: Epic<S>) {
+        epics.onNext(epic)
+    }
 
-	companion object {
+    companion object {
 
-		fun <S : Any> create(epic: Epic<S>): EpicMiddleware<S> {
-			return EpicMiddleware(epic)
-		}
+        fun <S : Any> create(epic: Epic<S>): EpicMiddleware<S> {
+            return EpicMiddleware(epic)
+        }
 
-	}
+    }
 }

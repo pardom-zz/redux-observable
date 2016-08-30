@@ -8,13 +8,12 @@ repositories {
 	maven { url "http://repository.jetbrains.com/all" }
 }
 
-sourceSets {
-	main.kotlin.srcDirs += 'src/main/kotlin'
-	test.kotlin.srcDirs += 'src/test/kotlin'
+configurations {
+	ktlint
 }
 
 dependencies {
-	compile 'com.github.pardom:redux-kotlin:-SNAPSHOT'
+	compile 'com.github.pardom.redux-kotlin:lib:1.0.1'
 	compile 'io.reactivex:rxjava:1.1.8'
 
 	testCompile 'junit:junit:4.12'
@@ -22,6 +21,14 @@ dependencies {
 	testCompile 'org.jetbrains.spek:spek:1.0.9'
 	testCompile 'org.mockito:mockito-core:2.0.86-beta'
 	testCompile 'com.github.pardom:redux-rxjava-kotlin:-SNAPSHOT'
+
+    ktlint 'com.github.shyiko:ktlint:0.1.2'
+}
+
+task ktlint(type: JavaExec) {
+	main = "com.github.shyiko.ktlint.Main"
+	classpath = configurations.ktlint
+	args "src/**/*.kt"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -38,3 +45,5 @@ artifacts {
 	archives sourcesJar
 	archives javadocJar
 }
+
+check.dependsOn ktlint

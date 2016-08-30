@@ -18,15 +18,15 @@ package rx.plugins
 
 object RxPluginsPackage {
 
-	fun setUp() {
-		RxJavaPlugins.getInstance().reset()
-		RxJavaPlugins.getInstance().registerErrorHandler(RxJavaPlugins.DEFAULT_ERROR_HANDLER)
-		RxJavaPlugins.getInstance().registerSchedulersHook(SynchronousSchedulersHook())
-		RxJavaPlugins.getInstance().registerObservableExecutionHook(RxJavaObservableExecutionHookDefault.getInstance())
-	}
+    fun setUp() {
+        RxJavaPlugins.getInstance().reset()
+        RxJavaPlugins.getInstance().registerErrorHandler(RxJavaPlugins.DEFAULT_ERROR_HANDLER)
+        RxJavaPlugins.getInstance().registerSchedulersHook(SynchronousSchedulersHook())
+        RxJavaPlugins.getInstance().registerObservableExecutionHook(RxJavaObservableExecutionHookDefault.getInstance())
+    }
 
-	fun reset() {
-		RxJavaPlugins.getInstance().reset()
-	}
+    fun reset() {
+        RxJavaPlugins.getInstance().reset()
+    }
 
 }

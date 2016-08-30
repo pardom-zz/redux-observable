@@ -18,20 +18,20 @@ package redux.observable.helpers
 
 object ActionCreators {
 
-	sealed class Action {
-		object FireGeneric : Action()
-		object Epic1Generic : Action()
-		object Epic2Generic : Action()
-		object Fire1 : Action()
-		object Fire2 : Action()
-		object Fire3 : Action()
-		object Fire4 : Action()
-		object Action1 : Action()
-		object Action2 : Action()
-		object Action3 : Action()
-		object Action4 : Action()
-		object AsyncAction1 : Action()
-		object AsyncAction2 : Action()
-	}
+    sealed class Action {
+        object FireGeneric : Action()
+        object Epic1Generic : Action()
+        object Epic2Generic : Action()
+        object Fire1 : Action()
+        object Fire2 : Action()
+        object Fire3 : Action()
+        object Fire4 : Action()
+        object Action1 : Action()
+        object Action2 : Action()
+        object Action3 : Action()
+        object Action4 : Action()
+        object AsyncAction1 : Action()
+        object AsyncAction2 : Action()
+    }
 
 }
