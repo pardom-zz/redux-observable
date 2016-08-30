@@ -22,18 +22,18 @@ import org.junit.runners.model.Statement
 
 class RxJavaPluginsResetRule : TestRule {
 
-	override fun apply(base: Statement?, description: Description?): Statement? {
-		return object : Statement() {
-			override fun evaluate() {
-				RxJavaPlugins.getInstance().reset()
-				RxJavaPlugins.getInstance().registerErrorHandler(RxJavaPlugins.DEFAULT_ERROR_HANDLER)
-				RxJavaPlugins.getInstance().registerSchedulersHook(SynchronousSchedulersHook())
-				RxJavaPlugins.getInstance().registerObservableExecutionHook(RxJavaObservableExecutionHookDefault.getInstance())
+    override fun apply(base: Statement?, description: Description?): Statement? {
+        return object : Statement() {
+            override fun evaluate() {
+                RxJavaPlugins.getInstance().reset()
+                RxJavaPlugins.getInstance().registerErrorHandler(RxJavaPlugins.DEFAULT_ERROR_HANDLER)
+                RxJavaPlugins.getInstance().registerSchedulersHook(SynchronousSchedulersHook())
+                RxJavaPlugins.getInstance().registerObservableExecutionHook(RxJavaObservableExecutionHookDefault.getInstance())
 
-				base?.evaluate()
+                base?.evaluate()
 
-				RxJavaPlugins.getInstance().reset()
-			}
-		}
-	}
+                RxJavaPlugins.getInstance().reset()
+            }
+        }
+    }
 }

@@ -21,16 +21,16 @@ import rx.schedulers.Schedulers
 
 class SynchronousSchedulersHook : RxJavaSchedulersHook() {
 
-	override fun getComputationScheduler(): Scheduler? {
-		return null
-	}
+    override fun getComputationScheduler(): Scheduler? {
+        return null
+    }
 
-	override fun getIOScheduler(): Scheduler? {
-		return Schedulers.immediate()
-	}
+    override fun getIOScheduler(): Scheduler? {
+        return Schedulers.immediate()
+    }
 
-	override fun getNewThreadScheduler(): Scheduler? {
-		return Schedulers.immediate()
-	}
+    override fun getNewThreadScheduler(): Scheduler? {
+        return Schedulers.immediate()
+    }
 
 }
