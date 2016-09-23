@@ -13,7 +13,7 @@ configurations {
 }
 
 dependencies {
-	compile 'com.github.pardom.redux-kotlin:lib:1.0.1'
+	compile 'com.github.pardom.redux-kotlin:lib:1.0.2'
 	compile 'io.reactivex:rxjava:1.1.8'
 
 	testCompile 'junit:junit:4.12'
