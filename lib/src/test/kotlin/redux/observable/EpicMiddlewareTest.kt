@@ -64,7 +64,7 @@ class EpicMiddlewareTest : Spek({
                     )
                 }
 
-                val store = createStore(reducer, emptyList(), applyMiddleware(EpicMiddleware.create(epic)))
+                val store = createStore(reducer, emptyList(), applyMiddleware(createEpicMiddleware(epic)))
 
                 store.dispatch(Fire1)
                 store.dispatch(Fire2)
@@ -100,8 +100,7 @@ class EpicMiddlewareTest : Spek({
                     )
                 }
 
-                val middleware = EpicMiddleware.create(epic1)
-
+                val middleware = createEpicMiddleware(epic1)
                 val store = createStore(reducer, emptyList(), applyMiddleware(middleware))
 
                 store.dispatch(Fire1)
@@ -129,7 +128,7 @@ class EpicMiddlewareTest : Spek({
                     FireGeneric,
                     Epic2Generic
 
-                )) { store.getState() }
+                )) { store.state }
             }
 
             it("should dispatch actions mapped to other threads") {
@@ -153,7 +152,7 @@ class EpicMiddlewareTest : Spek({
                     )
                 }
 
-                val store = createStore(reducer, emptyList(), applyMiddleware(EpicMiddleware.create(epic)))
+                val store = createStore(reducer, emptyList(), applyMiddleware(createEpicMiddleware(epic)))
                 store.asObservable().subscribe(subscriber)
 
                 store.dispatch(Fire1)

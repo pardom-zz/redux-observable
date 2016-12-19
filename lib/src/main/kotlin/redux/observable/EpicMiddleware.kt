@@ -24,35 +24,28 @@ import java.util.concurrent.atomic.AtomicBoolean
  * limitations under the License.
  */
 
-class EpicMiddleware<S : Any> : Middleware<S> {
-    private val actions = PublishSubject.create<Any>()
-    private val epics: BehaviorSubject<Epic<S>>
-    private val subscribed = AtomicBoolean(false)
+interface EpicMiddleware<S : Any> : Middleware<S> {
+    fun replaceEpic(epic: Epic<S>)
+}
 
-    private constructor(epic: Epic<S>) {
-        epics = BehaviorSubject.create(epic)
-    }
+fun <S : Any> createEpicMiddleware(epic: Epic<S>): EpicMiddleware<S> {
+    return object : EpicMiddleware<S> {
+        private val actions = PublishSubject.create<Any>()
+        private val epics = BehaviorSubject.create(epic)
+        private val subscribed = AtomicBoolean(false)
 
-    override fun dispatch(store: Store<S>, next: Dispatcher, action: Any): Any {
-        if (subscribed.compareAndSet(false, true)) {
-            epics.switchMap { it.map(actions.subscribeOn(Schedulers.immediate()), store) }
+        override fun dispatch(store: Store<S>, next: Dispatcher, action: Any): Any {
+            if (subscribed.compareAndSet(false, true)) {
+                epics.switchMap { it.map(actions.subscribeOn(Schedulers.immediate()), store) }
                     .subscribe { store.dispatch(it) }
+            }
+            val result = next.dispatch(action)
+            actions.onNext(action)
+            return result
         }
 
-        val result = next.dispatch(action)
-        actions.onNext(action)
-        return result
-    }
-
-    fun replaceEpic(epic: Epic<S>) {
-        epics.onNext(epic)
-    }
-
-    companion object {
-
-        fun <S : Any> create(epic: Epic<S>): EpicMiddleware<S> {
-            return EpicMiddleware(epic)
+        override fun replaceEpic(epic: Epic<S>) {
+            epics.onNext(epic)
         }
-
     }
 }
