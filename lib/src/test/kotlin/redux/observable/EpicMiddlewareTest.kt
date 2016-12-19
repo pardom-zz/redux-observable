@@ -1,10 +1,9 @@
 package redux.observable
 
 import org.jetbrains.spek.api.Spek
-import redux.Middleware
-import redux.Reducer
-import redux.Store
-import redux.Store.Companion.INIT
+import redux.api.Middleware
+import redux.api.Reducer
+import redux.api.Store
 import redux.asObservable
 import redux.observable.helpers.ActionCreators.Action.Action1
 import redux.observable.helpers.ActionCreators.Action.Action2
@@ -58,10 +57,12 @@ class EpicMiddlewareTest : Spek({
                     )
                 }
 
-                val store = Store.create(reducer, emptyList(), Middleware.apply(EpicMiddleware.create(epic)))
+                val store = createStore(reducer, emptyList(), applyMiddleware(EpicMiddleware.create(epic)))
 
                 store.dispatch(Fire1)
                 store.dispatch(Fire2)
+
+
 
                 expect(listOf(
                         INIT,

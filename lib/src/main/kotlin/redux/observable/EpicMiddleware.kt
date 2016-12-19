@@ -1,8 +1,8 @@
 package redux.observable
 
-import redux.Dispatcher
-import redux.Middleware
-import redux.Store
+import redux.api.Dispatcher
+import redux.api.Store
+import redux.api.enhancer.Middleware
 import rx.schedulers.Schedulers
 import rx.subjects.BehaviorSubject
 import rx.subjects.PublishSubject
@@ -33,7 +33,7 @@ class EpicMiddleware<S : Any> : Middleware<S> {
         epics = BehaviorSubject.create(epic)
     }
 
-    override fun dispatch(store: Store<S>, action: Any, next: Dispatcher): Any {
+    override fun dispatch(store: Store<S>, next: Dispatcher, action: Any): Any {
         if (subscribed.compareAndSet(false, true)) {
             epics.switchMap { it.map(actions.subscribeOn(Schedulers.immediate()), store) }
                     .subscribe { store.dispatch(it) }
