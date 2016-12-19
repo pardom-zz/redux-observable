@@ -1,10 +1,16 @@
 package redux.observable
 
 import org.jetbrains.spek.api.Spek
-import redux.api.Middleware
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.it
+import org.junit.platform.runner.JUnitPlatform
+import org.junit.runner.RunWith
+import redux.INIT
 import redux.api.Reducer
 import redux.api.Store
+import redux.applyMiddleware
 import redux.asObservable
+import redux.createStore
 import redux.observable.helpers.ActionCreators.Action.Action1
 import redux.observable.helpers.ActionCreators.Action.Action2
 import redux.observable.helpers.ActionCreators.Action.Action3
@@ -39,9 +45,10 @@ import kotlin.test.expect
  * limitations under the License.
  */
 
+@RunWith(JUnitPlatform::class)
 class EpicMiddlewareTest : Spek({
 
-    beforeEach { RxPluginsPackage.setUp() }
+    beforeEachTest { RxPluginsPackage.setUp() }
 
     describe("EpicMiddleware") {
 
@@ -52,8 +59,8 @@ class EpicMiddlewareTest : Spek({
 
                 val epic = Epic { actions: Observable<out Any>, store: Store<List<Any>> ->
                     Observable.merge(
-                            actions.ofType(Fire1::class.java).map { Action1 },
-                            actions.ofType(Fire2::class.java).map { Action2 }
+                        actions.ofType(Fire1::class.java).map { Action1 },
+                        actions.ofType(Fire2::class.java).map { Action2 }
                     )
                 }
 
@@ -65,13 +72,13 @@ class EpicMiddlewareTest : Spek({
 
 
                 expect(listOf(
-                        INIT,
-                        Fire1,
-                        Action1,
-                        Fire2,
-                        Action2
+                    INIT,
+                    Fire1,
+                    Action1,
+                    Fire2,
+                    Action2
 
-                )) { store.getState() }
+                )) { store.state }
             }
 
             it("should allow you to replace the root epic with replaceEpic") {
@@ -79,23 +86,23 @@ class EpicMiddlewareTest : Spek({
 
                 val epic1 = Epic { actions: Observable<out Any>, store: Store<List<Any>> ->
                     Observable.merge(
-                            actions.ofType(Fire1::class.java).map { Action1 },
-                            actions.ofType(Fire2::class.java).map { Action2 },
-                            actions.ofType(FireGeneric::class.java).map { Epic1Generic }
+                        actions.ofType(Fire1::class.java).map { Action1 },
+                        actions.ofType(Fire2::class.java).map { Action2 },
+                        actions.ofType(FireGeneric::class.java).map { Epic1Generic }
                     )
                 }
 
                 val epic2 = Epic { actions: Observable<out Any>, store: Store<List<Any>> ->
                     Observable.merge(
-                            actions.ofType(Fire3::class.java).map { Action3 },
-                            actions.ofType(Fire4::class.java).map { Action4 },
-                            actions.ofType(FireGeneric::class.java).map { Epic2Generic }
+                        actions.ofType(Fire3::class.java).map { Action3 },
+                        actions.ofType(Fire4::class.java).map { Action4 },
+                        actions.ofType(FireGeneric::class.java).map { Epic2Generic }
                     )
                 }
 
                 val middleware = EpicMiddleware.create(epic1)
 
-                val store = Store.create(reducer, emptyList(), Middleware.apply(middleware))
+                val store = createStore(reducer, emptyList(), applyMiddleware(middleware))
 
                 store.dispatch(Fire1)
                 store.dispatch(Fire2)
@@ -108,19 +115,19 @@ class EpicMiddlewareTest : Spek({
                 store.dispatch(FireGeneric)
 
                 expect(listOf(
-                        INIT,
-                        Fire1,
-                        Action1,
-                        Fire2,
-                        Action2,
-                        FireGeneric,
-                        Epic1Generic,
-                        Fire3,
-                        Action3,
-                        Fire4,
-                        Action4,
-                        FireGeneric,
-                        Epic2Generic
+                    INIT,
+                    Fire1,
+                    Action1,
+                    Fire2,
+                    Action2,
+                    FireGeneric,
+                    Epic1Generic,
+                    Fire3,
+                    Action3,
+                    Fire4,
+                    Action4,
+                    FireGeneric,
+                    Epic2Generic
 
                 )) { store.getState() }
             }
@@ -134,19 +141,19 @@ class EpicMiddlewareTest : Spek({
                 val epic = Epic { actions: Observable<out Any>, store: Store<List<Any>> ->
                     // Simulate network requests
                     val networkRequest1 = Observable.just(Action1)
-                            .subscribeOn(scheduler)
-                            .delay(100L, MILLISECONDS, scheduler)
+                        .subscribeOn(scheduler)
+                        .delay(100L, MILLISECONDS, scheduler)
                     val networkRequest2 = Observable.just(Action2)
-                            .subscribeOn(scheduler)
-                            .delay(200L, MILLISECONDS, scheduler)
+                        .subscribeOn(scheduler)
+                        .delay(200L, MILLISECONDS, scheduler)
 
                     Observable.merge(
-                            actions.ofType(Fire1::class.java).flatMap { networkRequest1 },
-                            actions.ofType(Fire2::class.java).flatMap { networkRequest2 }
+                        actions.ofType(Fire1::class.java).flatMap { networkRequest1 },
+                        actions.ofType(Fire2::class.java).flatMap { networkRequest2 }
                     )
                 }
 
-                val store = Store.create(reducer, emptyList(), Middleware.apply(EpicMiddleware.create(epic)))
+                val store = createStore(reducer, emptyList(), applyMiddleware(EpicMiddleware.create(epic)))
                 store.asObservable().subscribe(subscriber)
 
                 store.dispatch(Fire1)
@@ -155,28 +162,28 @@ class EpicMiddlewareTest : Spek({
                 scheduler.advanceTimeBy(500L, MILLISECONDS)
 
                 subscriber.assertValues(
-                        listOf(
-                                INIT,
-                                Fire1
-                        ),
-                        listOf(
-                                INIT,
-                                Fire1,
-                                Fire2
-                        ),
-                        listOf(
-                                INIT,
-                                Fire1,
-                                Fire2,
-                                Action1
-                        ),
-                        listOf(
-                                INIT,
-                                Fire1,
-                                Fire2,
-                                Action1,
-                                Action2
-                        )
+                    listOf(
+                        INIT,
+                        Fire1
+                    ),
+                    listOf(
+                        INIT,
+                        Fire1,
+                        Fire2
+                    ),
+                    listOf(
+                        INIT,
+                        Fire1,
+                        Fire2,
+                        Action1
+                    ),
+                    listOf(
+                        INIT,
+                        Fire1,
+                        Fire2,
+                        Action1,
+                        Action2
+                    )
                 )
             }
 
@@ -184,6 +191,6 @@ class EpicMiddlewareTest : Spek({
 
     }
 
-    afterEach { RxPluginsPackage.reset() }
+    afterEachTest { RxPluginsPackage.reset() }
 
 })
