@@ -69,8 +69,6 @@ class EpicMiddlewareTest : Spek({
                 store.dispatch(Fire1)
                 store.dispatch(Fire2)
 
-
-
                 expect(listOf(
                     INIT,
                     Fire1,
