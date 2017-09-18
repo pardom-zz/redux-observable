@@ -1,2 +1,2 @@
-include ':rxjava'
-include ':rxjava2'
+include ':redux-observable'
+include ':redux-observable2'
