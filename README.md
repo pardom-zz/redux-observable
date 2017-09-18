@@ -16,5 +16,9 @@ repositories {
 ```
 
 ```groovy
-compile 'com.github.pardom:redux-observable-kotlin:<version>'
+// RxJava 1
+compile 'com.github.pardom.redux-observable:rxjava:<version>'
+
+// RxJava 2
+compile 'com.github.pardom.redux-observable:rxjava2:<version>'
 ```
