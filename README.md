@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/pardom/redux-observable-kotlin.svg?branch=master)](https://travis-ci.org/pardom/redux-observable-kotlin)
-[![](https://jitpack.io/v/pardom/redux-observable-kotlin.svg)](https://jitpack.io/#pardom/redux-observable-kotlin)
+[![Build Status](https://travis-ci.org/pardom/redux-observable.svg?branch=master)](https://travis-ci.org/pardom/redux-observable)
+[![](https://jitpack.io/v/pardom/redux-observable.svg)](https://jitpack.io/#pardom/redux-observable)
 
 # Redux Observable
 
